@@ -11,6 +11,8 @@
 #include <jni.h>
 #include <iostream>
 #include <v8-debug.h>
+#include <libplatform/libplatform.h>
+
 #include <v8.h>
 #include <map>
 #include <cstdlib>
@@ -30,6 +32,8 @@ public:
   jobject v8;
   jthrowable pendingException;
 };
+
+v8::Platform* myplatform;
 
 const char* ToCString(const String::Utf8Value& value) {
   return *value ? *value : "<string conversion failed>";
@@ -156,16 +160,17 @@ void debugHandler() {
 
 JNIEXPORT jboolean JNICALL Java_com_eclipsesource_v8_V8__1enableDebugSupport
 (JNIEnv *env, jobject, jint v8RuntimeHandle, jint port, jboolean waitForConnection) {
-  Isolate* isolate = SETUP(env, v8RuntimeHandle, false);
-  bool result = Debug::EnableAgent("j2v8", port, waitForConnection);
-  Debug::SetDebugMessageDispatchHandler(&debugHandler);
-  return result;
+//  Isolate* isolate = SETUP(env, v8RuntimeHandle, false);
+//  bool result = Debug::EnableAgent("j2v8", port, waitForConnection);
+//  Debug::DebugMessageDispatchHandler(&debugHandler);
+//  return result;
+  return false;
 }
 
 JNIEXPORT void JNICALL Java_com_eclipsesource_v8_V8__1disableDebugSupport
 (JNIEnv *env, jobject, jint v8RuntimeHandle) {
-  Isolate* isolate = SETUP(env, v8RuntimeHandle, );
-  Debug::DisableAgent();
+//  Isolate* isolate = SETUP(env, v8RuntimeHandle, );
+//  Debug::DisableAgent();
 }
 
 JNIEXPORT void JNICALL Java_com_eclipsesource_v8_V8__1processDebugMessages
@@ -211,6 +216,10 @@ JNIEXPORT void JNICALL Java_com_eclipsesource_v8_V8__1createIsolate
     v8ScriptExecutionException = (jclass)env->NewGlobalRef((env)->FindClass("com/eclipsesource/v8/V8ScriptExecutionException"));
     v8RuntimeException = (jclass)env->NewGlobalRef((env)->FindClass("com/eclipsesource/v8/V8RuntimeException"));
     errorCls = (jclass)env->NewGlobalRef((env)->FindClass("java/lang/Error"));
+    v8::V8::InitializeICU();
+    myplatform = v8::platform::CreateDefaultPlatform();
+    v8::V8::InitializePlatform(myplatform);
+    v8::V8::Initialize();
   }
   v8Isolates[handle] = new V8Runtime();
   v8Isolates[handle]->isolate = Isolate::New();
@@ -434,6 +443,7 @@ JNIEXPORT jint JNICALL Java_com_eclipsesource_v8_V8__1executeIntScript
 
 JNIEXPORT jobject JNICALL Java_com_eclipsesource_v8_V8__1executeScript
 (JNIEnv *env, jobject v8, jint v8RuntimeHandle, jint expectedType, jstring jjstring, jstring jscriptName = NULL, jint jlineNumber = 0) {
+  return NULL;
   Isolate* isolate = SETUP(env, v8RuntimeHandle, NULL);
   TryCatch tryCatch;
   Local<Script> script;
